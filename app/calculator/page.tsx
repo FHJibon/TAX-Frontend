@@ -19,48 +19,26 @@ export default function CalculatorPage() {
   const { t, language } = useI18n()
   
   const [income, setIncome] = React.useState({
-    salary: '',
-    business: '',
-    rental: '',
-    other: ''
+    monthlySalary: ''
   })
   
-  const [deductions, setDeductions] = React.useState({
-    investment: '',
-    donation: '',
-    insurance: '',
-    providentFund: ''
-  })
+  // Deductions removed per request
   
   const [result, setResult] = React.useState<{
     totalIncome: number
     taxableIncome: number
     totalTax: number
-    effectiveRate: number
   } | null>(null)
 
   const calculateTax = () => {
-    // Bangladesh tax calculation logic
-    const totalIncome = 
-      Number(income.salary || 0) + 
-      Number(income.business || 0) + 
-      Number(income.rental || 0) + 
-      Number(income.other || 0)
-    
-    const totalDeductions = 
-      Number(deductions.investment || 0) + 
-      Number(deductions.donation || 0) + 
-      Number(deductions.insurance || 0) + 
-      Number(deductions.providentFund || 0)
-    
+    // Only use monthly salary, annualize it
+    const monthlySalary = Number(income.monthlySalary || 0)
+    const totalIncome = monthlySalary * 12
     // Bangladesh tax slabs (2024-25)
     const exemptionLimit = 350000
-    let taxableIncome = totalIncome - exemptionLimit - totalDeductions
-    
+    let taxableIncome = totalIncome - exemptionLimit
     if (taxableIncome < 0) taxableIncome = 0
-    
     let tax = 0
-    
     // Tax calculation based on Bangladesh slabs
     if (taxableIncome <= 100000) {
       tax = 0
@@ -75,24 +53,17 @@ export default function CalculatorPage() {
     } else {
       tax = 205000 + (taxableIncome - 1600000) * 0.25
     }
-    
-    // Minimum tax
-    const minimumTax = Math.max(5000, totalIncome * 0.005)
-    tax = Math.max(tax, minimumTax)
-    
-    const effectiveRate = totalIncome > 0 ? (tax / totalIncome) * 100 : 0
-    
+    // Remove minimum tax floor per request; show slab-based tax only
+    if (totalIncome === 0) tax = 0
     setResult({
       totalIncome,
-      taxableIncome: taxableIncome + exemptionLimit,
-      totalTax: tax,
-      effectiveRate
+      taxableIncome,
+      totalTax: tax
     })
   }
 
   const resetCalculator = () => {
-    setIncome({ salary: '', business: '', rental: '', other: '' })
-    setDeductions({ investment: '', donation: '', insurance: '', providentFund: '' })
+    setIncome({ monthlySalary: '' })
     setResult(null)
   }
 
@@ -114,159 +85,52 @@ export default function CalculatorPage() {
             language === 'bn' ? 'bangla-text' : ''
           }`}>
             {language === 'bn' 
-              ? 'আপনার কর দায় গণনা করুন এবং সম্ভাব্য সঞ্চয় দেখুন' 
-              : 'Calculate your tax liability and see potential savings'}
+              ? 'আপনার করের পরিমাণ গণনা করুন' 
+              : 'Calculate your tax amount'}
           </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Input Section */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Income Section */}
+            {/* Income Section (Only Monthly Salary) */}
             <Card>
               <CardHeader>
                 <CardTitle className={`flex items-center space-x-2 ${
                   language === 'bn' ? 'bangla-text' : ''
                 }`}>
                   <DollarSign className="h-5 w-5" />
-                  <span>{language === 'bn' ? 'আয়ের উৎস' : 'Income Sources'}</span>
+                  <span>{language === 'bn' ? 'মাসিক বেতন' : 'Monthly Salary'}</span>
                 </CardTitle>
                 <CardDescription className={language === 'bn' ? 'bangla-text' : ''}>
-                  {language === 'bn' 
-                    ? 'আপনার বিভিন্ন উৎস থেকে আয় লিখুন (৳ টাকায়)' 
-                    : 'Enter your income from various sources (in ৳ BDT)'}
+                  {language === 'bn'
+                    ? 'শুধুমাত্র মাসিক বেতন লিখুন (৳ টাকায়)। বার্ষিক আয় স্বয়ংক্রিয়ভাবে গণনা হবে।'
+                    : 'Enter your monthly salary (in ৳ BDT). Annual income will be calculated automatically.'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'বেতন আয়' : 'Salary Income'}
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={income.salary}
-                      onChange={(e) => setIncome({...income, salary: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'ব্যবসায়িক আয়' : 'Business Income'}
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={income.business}
-                      onChange={(e) => setIncome({...income, business: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'ভাড়া আয়' : 'Rental Income'}
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={income.rental}
-                      onChange={(e) => setIncome({...income, rental: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'অন্যান্য আয়' : 'Other Income'}
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={income.other}
-                      onChange={(e) => setIncome({...income, other: e.target.value})}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className={`text-sm font-medium ${
+                    language === 'bn' ? 'bangla-text' : ''
+                  }`}>
+                    {language === 'bn' ? 'মাসিক বেতন' : 'Monthly Salary'}
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={income.monthlySalary}
+                    onChange={(e) => setIncome({ monthlySalary: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {language === 'bn'
+                      ? `বার্ষিক আয়: ৳ ${(Number(income.monthlySalary || 0) * 12).toLocaleString()}`
+                      : `Annual Income: ৳ ${(Number(income.monthlySalary || 0) * 12).toLocaleString()}`}
+                  </p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Deductions Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className={`flex items-center space-x-2 ${
-                  language === 'bn' ? 'bangla-text' : ''
-                }`}>
-                  <TrendingDown className="h-5 w-5" />
-                  <span>{language === 'bn' ? 'কর ছাড় ও ছাড়' : 'Tax Deductions & Exemptions'}</span>
-                </CardTitle>
-                <CardDescription className={language === 'bn' ? 'bangla-text' : ''}>
-                  {language === 'bn' 
-                    ? 'কর ছাড়যোগ্য বিনিয়োগ এবং খরচ লিখুন' 
-                    : 'Enter tax-deductible investments and expenses'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'বিনিয়োগ (এফডিআর, ডিপিএস)' : 'Investment (FDR, DPS)'}
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={deductions.investment}
-                      onChange={(e) => setDeductions({...deductions, investment: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'দান' : 'Donations'}
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={deductions.donation}
-                      onChange={(e) => setDeductions({...deductions, donation: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'জীবন বীমা' : 'Life Insurance'}
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={deductions.insurance}
-                      onChange={(e) => setDeductions({...deductions, insurance: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'প্রভিডেন্ট ফান্ড' : 'Provident Fund'}
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={deductions.providentFund}
-                      onChange={(e) => setDeductions({...deductions, providentFund: e.target.value})}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Deductions Section removed as requested */}
 
             {/* Action Buttons */}
             <div className="flex space-x-4">
@@ -324,20 +188,8 @@ export default function CalculatorPage() {
                         ৳ {result.totalTax.toLocaleString()}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-3">
-                      <span className={`font-medium ${
-                        language === 'bn' ? 'bangla-text' : ''
-                      }`}>
-                        {language === 'bn' ? 'কার্যকর হার' : 'Effective Rate'}
-                      </span>
-                      <span className="font-bold text-lg">
-                        {result.effectiveRate.toFixed(2)}%
-                      </span>
-                    </div>
-                    <Button className="w-full" variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
-                      {language === 'bn' ? 'রিপোর্ট ডাউনলোড' : 'Download Report'}
-                    </Button>
+                    {/* Effective Rate removed as requested */}
+                    {/* Download Report removed as requested */}
                   </CardContent>
                 </Card>
               </>
@@ -356,47 +208,7 @@ export default function CalculatorPage() {
               </Card>
             )}
 
-            {/* Tax Slabs Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className={`flex items-center space-x-2 text-sm ${
-                  language === 'bn' ? 'bangla-text' : ''
-                }`}>
-                  <Info className="h-4 w-4" />
-                  <span>{language === 'bn' ? 'কর হার (২০২৪-২৫)' : 'Tax Rates (2024-25)'}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>৳ 0 - 3,50,000</span>
-                  <span className="font-medium">{language === 'bn' ? 'করমুক্ত' : 'Tax Free'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>৳ 1,00,000</span>
-                  <span className="font-medium">0%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>৳ 4,00,000</span>
-                  <span className="font-medium">5%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>৳ 7,00,000</span>
-                  <span className="font-medium">10%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>৳ 11,00,000</span>
-                  <span className="font-medium">15%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>৳ 16,00,000</span>
-                  <span className="font-medium">20%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Above ৳ 16,00,000</span>
-                  <span className="font-medium">25%</span>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Tax Slabs Info removed as requested */}
           </div>
         </div>
       </div>

@@ -7,8 +7,8 @@ import { usePathname } from 'next/navigation'
 export default function ConditionalFooter() {
   const pathname = usePathname()
 
-  // Hide footer on workspace and dashboard routes
-  if (pathname && (pathname.startsWith('/workspace') || pathname.startsWith('/dashboard'))) return null
+  // Show footer only on the home page; hide on all other routes
+  if (pathname && pathname !== '/') return null
 
   return (
     <footer className="bg-background border-t py-6">
