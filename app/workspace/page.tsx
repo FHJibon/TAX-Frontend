@@ -76,15 +76,15 @@ export default function WorkspacePage() {
           {/* Top Row - Upload and Chat */}
           <div className="grid lg:grid-cols-2 gap-6 items-stretch">
             {/* Left: Upload Section */}
-            <div className="flex flex-col space-y-3 h-full">
+            <div className="flex flex-col space-y-3 h-full min-h-0">
               {/* Interactive Uploader */}
-              <div className="flex-1">
+              <div>
                 <FileUploader onFilesUpload={handleFilesUpload} maxFiles={5} hideInfo />
               </div>
 
               {/* Uploaded Files Status */}
               {uploadedFiles.length > 0 ? (
-                <Card className="flex-1 animate-none">
+                <Card className="h-full max-h-[660px] animate-none">
                   <CardHeader className="pb-3">
                     <CardTitle className={`text-sm ${
                       language === 'bn' ? 'bangla-text' : ''
@@ -97,25 +97,27 @@ export default function WorkspacePage() {
                         : `${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} processed`}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-2">
-                    {uploadedFiles.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                        <div className="flex items-center space-x-2">
-                          <FileText className="h-4 w-4 text-primary" />
-                          <span className="text-sm font-medium truncate max-w-[200px]">{file.name}</span>
+                  <CardContent className="h-full overflow-hidden min-h-0">
+                    <div className="h-full max-h-[520px] overflow-auto pr-1 space-y-2">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                          <div className="flex items-center space-x-2 min-w-0">
+                            <FileText className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium truncate max-w-[360px]">{file.name}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-green-600 dark:text-green-400 flex items-center">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              {language === 'bn' ? 'সম্পন্ন' : 'Done'}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs text-green-600 dark:text-green-400 flex items-center">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            {language === 'bn' ? 'সম্পন্ন' : 'Done'}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               ) : (
-                <Card className="border-dashed flex-1 animate-none">
+                <Card className="border-dashed h-full max-h-[660px] animate-none">
                   <CardContent className="py-20 text-center h-full flex flex-col items-center justify-center">
                     <Upload className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                     <p className={`text-base font-medium text-muted-foreground mb-2 ${

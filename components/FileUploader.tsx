@@ -237,7 +237,7 @@ export function FileUploader({
         {files.length > 0 && (
           <div className="space-y-3">
             <h4 className="font-medium">Uploaded Files ({files.length})</h4>
-            <div className="space-y-2">
+            <div className="max-h-[520px] overflow-auto pr-1 space-y-2">
               {files.map((file) => (
                 <div
                   key={file.id}

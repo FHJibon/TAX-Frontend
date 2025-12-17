@@ -53,7 +53,7 @@ const resources = {
       
       // Upload
       'upload.title': 'Upload Documents',
-      'upload.subtitle': 'Upload your salary certificates, income statements, and other tax documents',
+      'upload.subtitle': 'Upload Your Salary Certificates, NID & TIN Certificate',
       'upload.dropzone': 'Drag and drop files here, or click to select',
       'upload.supported': 'Supported formats: PDF, JPG, PNG',
       'upload.processing': 'Processing documents...',
@@ -152,7 +152,7 @@ const resources = {
       
       // Upload
       'upload.title': 'নথি আপলোড করুন',
-      'upload.subtitle': 'আপনার বেতন সার্টিফিকেট, আয়ের বিবৃতি এবং অন্যান্য কর নথি আপলোড করুন',
+      'upload.subtitle': 'আপনার বেতন সার্টিফিকেট, এনআইডি ও টিআইএন সার্টিফিকেট আপলোড করুন',
       'upload.dropzone': 'ফাইলগুলি এখানে টেনে আনুন বা নির্বাচন করতে ক্লিক করুন',
       'upload.supported': 'সমর্থিত ফরম্যাট: PDF, JPG, PNG',
       'upload.processing': 'নথি প্রক্রিয়াকরণ করা হচ্ছে...',
