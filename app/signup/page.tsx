@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useI18n } from '@/lib/i18n-provider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,6 +11,7 @@ import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
 
 export default function SignupPage() {
   const { t, language } = useI18n()
+  const router = useRouter()
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [formData, setFormData] = React.useState({
@@ -25,8 +27,8 @@ export default function SignupPage() {
       alert('Passwords do not match')
       return
     }
-    // Handle signup logic here
-    console.log('Signup attempt:', formData)
+    // Redirect to verify OTP page
+    router.push(`/verify-otp?type=signup&email=${encodeURIComponent(formData.email)}`)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,30 +40,40 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen relative bg-[#0a0a0a] dark:bg-[#0a0a0a] flex items-center justify-center p-4 pt-20">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}></div>
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+      </div>
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-6 md:mb-8 animate-scale-in">
           <Link href="/">
-            <img src="/logo.svg" alt="Logo" className="h-16 w-16 rounded-xl shadow-lg hover:shadow-xl transition-shadow" />
+            <img src="/logo.svg" alt="Logo" className="h-14 w-14 md:h-16 md:w-16 rounded-xl shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300" />
           </Link>
         </div>
 
         {/* Signup Form */}
-        <Card className="w-full">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">
+        <Card className="w-full shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden animate-fade-in-up animation-delay-200">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          <CardHeader className="text-center relative z-10">
+            <CardTitle className="text-2xl font-bold text-white">
               {t('auth.signup')}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-400">
               Create your account to get started
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative z-10">
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">
+                <label className="text-sm font-medium text-white">
                   Full Name
                 </label>
                 <div className="relative">
@@ -80,7 +92,7 @@ export default function SignupPage() {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">
+                <label className="text-sm font-medium text-white">
                   {t('auth.email')}
                 </label>
                 <div className="relative">
@@ -99,7 +111,7 @@ export default function SignupPage() {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">
+                <label className="text-sm font-medium text-white">
                   {t('auth.password')}
                 </label>
                 <div className="relative">
@@ -129,7 +141,7 @@ export default function SignupPage() {
 
               {/* Confirm Password Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">
+                <label className="text-sm font-medium text-white">
                   {t('auth.confirmPassword')}
                 </label>
                 <div className="relative">
@@ -165,7 +177,7 @@ export default function SignupPage() {
                   className="mt-1"
                   required
                 />
-                <label htmlFor="terms" className="text-muted-foreground">
+                <label htmlFor="terms" className="text-gray-400">
                   I agree to the{' '}
                   <Link href="/terms" className="text-primary hover:underline">
                     Terms of Service

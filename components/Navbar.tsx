@@ -4,141 +4,142 @@ import React from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useI18n } from '@/lib/i18n-provider'
+import { useAuth } from '@/lib/auth-provider'
 import { Button } from '@/components/ui/button'
 import { 
   Menu, 
   X, 
-  Globe, 
-  Moon, 
-  Sun,
+  Globe,
   Home,
   Briefcase,
   BarChart3,
-  LogOut
+  LogOut,
+  User,
+  ChevronDown
 } from 'lucide-react'
-import { useTheme } from 'next-themes'
 
 export function Navbar() {
   const { language, setLanguage, t } = useI18n()
-  const { theme, setTheme } = useTheme()
+  const { isAuthenticated, logout } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
-  const [mounted, setMounted] = React.useState(false)
+  const [showProfileMenu, setShowProfileMenu] = React.useState(false)
   const pathname = usePathname()
   const router = useRouter()
 
-  // Check if user is on authenticated pages (dashboard, workspace, profile, etc.)
-  const isAuthenticatedPage = pathname?.startsWith('/dashboard') || 
-    pathname?.startsWith('/workspace') || 
-    pathname?.startsWith('/profile') ||
-    pathname?.startsWith('/chat') ||
-    pathname?.startsWith('/upload') ||
-    pathname?.startsWith('/forms')
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
   const navigation = [
-    { name: t('nav.home'), href: '/', icon: Home },
-    { name: t('nav.workspace'), href: '/workspace', icon: Briefcase },
-    { name: t('nav.dashboard'), href: '/dashboard', icon: BarChart3 },
-  ]
+    { name: t('nav.home'), href: '/', icon: Home, public: true },
+    { name: t('nav.workspace'), href: '/workspace', icon: Briefcase, public: false },
+    { name: t('nav.dashboard'), href: '/dashboard', icon: BarChart3, public: false },
+  ].filter(item => item.public || isAuthenticated)
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'bn' : 'en')
   }
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
-  }
-
   return (
-    <nav className="bg-background border-b sticky top-0 z-40">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="flex items-center space-x-2">
-                <img src="/logo.svg" alt="Logo" className="h-10 w-10" />
-              </Link>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              {navigation.map((item) => {
-                const Icon = item.icon
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-foreground hover:text-primary transition-colors border-b-2 border-transparent hover:border-primary"
-                  >
-                    <Icon className="h-4 w-4 mr-2" />
-                    {item.name}
-                  </Link>
-                )
-              })}
-            </div>
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center space-x-3 group">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl blur-md opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                <img src="/logo.svg" alt="Logo" className="h-10 w-10 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+              </div>
+              <span className="text-lg font-bold text-white hidden md:block">Tax Assistant</span>
+            </Link>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            {navigation.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`
+                    inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 group relative overflow-hidden
+                    ${isActive 
+                      ? 'text-white bg-white/10' 
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }
+                  `}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                  <Icon className="h-4 w-4 mr-2 relative z-10" />
+                  <span className="relative z-10">{item.name}</span>
+                </Link>
+              )
+            })}
           </div>
           
-          <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
+          {/* Right Side Actions */}
+          <div className="hidden md:flex items-center space-x-2">
+            {/* Language Toggle */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleLanguage}
-              className="relative"
+              className="relative h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-300 group"
               aria-label="Toggle language"
             >
-              <Globe className="h-6 w-6 text-white drop-shadow" />
-              <span
-                className="absolute -top-2 -right-2 text-primary-foreground text-sm font-medium rounded-full h-6 w-6 flex items-center justify-center border-2 shadow-lg z-20 select-none"
-                style={{
-                  background: 'hsl(var(--primary))',
-                  borderColor: 'hsl(var(--primary))',
-                  letterSpacing: '0.5px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)'
-                }}
-              >
+              <Globe className="h-4 w-4 text-gray-400 group-hover:text-white transition-colors" />
+              <span className="absolute -top-1 -right-1 bg-gradient-to-br from-blue-600 to-purple-600 text-white text-[10px] font-bold rounded-md px-1.5 py-0.5 shadow-lg">
                 {language === 'en' ? 'EN' : 'বা'}
               </span>
             </Button>
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-            >
-              {mounted ? (
-                theme === 'dark' ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )
-              ) : (
-                <span className="inline-block h-5 w-5" />
-              )}
-            </Button>
 
-            {isAuthenticatedPage ? (
-              <>
-                
+            {/* Auth Buttons */}
+            {isAuthenticated ? (
+              <div className="relative">
                 <Button
-                  variant="outline"
-                  onClick={() => router.push('/login')}
-                  className="flex items-center space-x-2"
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 hover:text-white transition-all duration-300 rounded-lg px-4 py-2 h-9"
                 >
-                  <LogOut className="h-4 w-4" />
-                  <span>Sign Out</span>
+                  <User className="h-4 w-4" />
+                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${showProfileMenu ? 'rotate-180' : ''}`} />
                 </Button>
-              </>
+                
+                {/* Profile Dropdown */}
+                {showProfileMenu && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-lg bg-black/90 backdrop-blur-xl border border-white/10 shadow-xl z-50 overflow-hidden">
+                    <button
+                      onClick={() => {
+                        setShowProfileMenu(false)
+                        router.push('/profile')
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-all duration-300 text-left"
+                    >
+                      <User className="h-4 w-4" />
+                      <span className="text-sm font-medium">Profile</span>
+                    </button>
+                    <div className="h-px bg-white/10" />
+                    <button
+                      onClick={() => {
+                        setShowProfileMenu(false)
+                        logout()
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-all duration-300 text-left text-red-400"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span className="text-sm font-medium">Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="outline">
+                  <Button className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 hover:text-white transition-all duration-300 rounded-lg px-4 py-2 h-9 text-sm font-medium">
                     {t('nav.login')}
                   </Button>
                 </Link>
                 
                 <Link href="/signup">
-                  <Button>
+                  <Button className="bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 hover:scale-105 transition-all duration-300 rounded-lg px-4 py-2 h-9 text-sm font-medium">
                     {t('nav.signup')}
                   </Button>
                 </Link>
@@ -146,16 +147,18 @@ export function Navbar() {
             )}
           </div>
 
-          <div className="sm:hidden flex items-center">
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-300"
             >
               {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5 text-white" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-5 w-5 text-white" />
               )}
             </Button>
           </div>
@@ -164,76 +167,77 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="sm:hidden">
-          <div className="pt-2 pb-3 space-y-1 bg-background border-t">
+        <div className="md:hidden border-t border-white/5 bg-[#0a0a0a]/95 backdrop-blur-xl">
+          <div className="px-4 py-4 space-y-2">
             {navigation.map((item) => {
               const Icon = item.icon
+              const isActive = pathname === item.href
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center px-3 py-2 text-base font-medium text-foreground hover:text-primary hover:bg-accent"
+                  className={`
+                    flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 group relative overflow-hidden
+                    ${isActive 
+                      ? 'text-white bg-white/10' 
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }
+                  `}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Icon className="h-5 w-5 mr-3" />
-                  {item.name}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                  <Icon className="h-5 w-5 mr-3 relative z-10" />
+                  <span className="relative z-10">{item.name}</span>
                 </Link>
               )
             })}
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-200">
-            <div className="flex items-center px-4 space-x-3">
+
+          <div className="px-4 py-4 border-t border-white/5">
+            <div className="flex items-center space-x-2 mb-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleLanguage}
-                className="flex items-center space-x-2"
+                className="w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 hover:text-white rounded-lg h-9"
               >
-                <Globe className="h-4 w-4" />
-                <span>{language === 'en' ? 'English' : 'বাংলা'}</span>
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleTheme}
-              >
-                {mounted ? (
-                  theme === 'dark' ? (
-                    <Sun className="h-4 w-4" />
-                  ) : (
-                    <Moon className="h-4 w-4" />
-                  )
-                ) : (
-                  <span className="inline-block h-4 w-4" />
-                )}
+                <Globe className="h-4 w-4 mr-2" />
+                <span className="text-sm">{language === 'en' ? 'English' : 'বাংলা'}</span>
               </Button>
             </div>
-            <div className="mt-3 px-2 space-y-1">
-              {isAuthenticatedPage ? (
+
+            <div className="space-y-2">
+              {isAuthenticated ? (
                 <>
-                  
+                  <Link href="/profile" className="block w-full">
+                    <Button 
+                      className="w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 hover:text-white rounded-lg h-10"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      <span className="text-sm font-medium">Profile</span>
+                    </Button>
+                  </Link>
                   <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
+                    className="w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-red-400 hover:text-red-300 rounded-lg h-10"
                     onClick={() => {
-                      router.push('/login')
+                      logout()
                       setIsMobileMenuOpen(false)
                     }}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
+                    <span className="text-sm font-medium">Sign Out</span>
                   </Button>
                 </>
               ) : (
                 <>
                   <Link href="/login" className="block w-full">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button className="w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 hover:text-white rounded-lg h-10 text-sm font-medium">
                       {t('nav.login')}
                     </Button>
                   </Link>
                   <Link href="/signup" className="block w-full">
-                    <Button className="w-full justify-start">
+                    <Button className="w-full bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-blue-600/20 rounded-lg h-10 text-sm font-medium">
                       {t('nav.signup')}
                     </Button>
                   </Link>

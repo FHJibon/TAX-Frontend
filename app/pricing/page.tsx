@@ -86,18 +86,32 @@ export default function PricingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="h-screen overflow-hidden relative bg-[#0a0a0a] dark:bg-[#0a0a0a]">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}></div>
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+      </div>
       <Navbar />
       
-      <div className="container mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${
-            language === 'bn' ? 'bangla-text' : ''
-          }`}>
-            {language === 'bn' ? 'মূল্য' : 'Pricing'}
-          </h1>
-          <p className={`text-xl text-muted-foreground max-w-2xl mx-auto ${
+      <div className="h-screen overflow-y-auto scrollbar-hide">
+        <div className="pt-20">
+          <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
+            {/* Header */}
+        <div className="text-center mb-6 md:mb-8">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Sparkles className="h-7 w-7 md:h-8 md:w-8 text-blue-400" />
+            <h1 className={`text-2xl md:text-3xl lg:text-4xl font-black text-white ${
+              language === 'bn' ? 'bangla-text' : ''
+            }`}>
+              {language === 'bn' ? 'মূল্য' : 'Pricing'}
+            </h1>
+          </div>
+          <p className={`text-base md:text-lg text-gray-400 max-w-2xl mx-auto ${
             language === 'bn' ? 'bangla-text' : ''
           }`}>
             {language === 'bn' 
@@ -113,12 +127,13 @@ export default function PricingPage() {
             return (
               <Card 
                 key={index} 
-                className={`relative ${
+                className={`relative shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group overflow-hidden ${
                   plan.popular 
-                    ? 'border-primary shadow-xl scale-105' 
-                    : 'border-muted'
+                    ? 'scale-105 ring-2 ring-blue-500/50' 
+                    : ''
                 }`}
               >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <span className={`px-4 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full ${
@@ -129,25 +144,25 @@ export default function PricingPage() {
                   </div>
                 )}
                 
-                <CardHeader className="text-center pb-8">
-                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${plan.bgColor} flex items-center justify-center`}>
+                <CardHeader className="text-center pb-8 relative z-10">
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${plan.bgColor} flex items-center justify-center border border-white/10`}>
                     <Icon className={`h-8 w-8 ${plan.color}`} />
                   </div>
                   
-                  <CardTitle className={`text-2xl mb-2 ${
+                  <CardTitle className={`text-2xl mb-2 text-white font-bold ${
                     language === 'bn' ? 'bangla-text' : ''
                   }`}>
                     {plan.name}
                   </CardTitle>
                   
                   <div className="mb-2">
-                    <span className={`text-4xl font-bold ${
+                    <span className={`text-4xl font-bold text-white ${
                       language === 'bn' ? 'bangla-text' : ''
                     }`}>
                       {plan.price}
                     </span>
                     {plan.period && (
-                      <span className={`text-muted-foreground ml-1 ${
+                      <span className={`text-gray-400 ml-1 ${
                         language === 'bn' ? 'bangla-text' : ''
                       }`}>
                         {plan.period}
@@ -155,12 +170,12 @@ export default function PricingPage() {
                     )}
                   </div>
                   
-                  <CardDescription className={language === 'bn' ? 'bangla-text' : ''}>
+                  <CardDescription className={`${language === 'bn' ? 'bangla-text' : ''} text-gray-400`}>
                     {plan.description}
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 relative z-10">
                   <ul className="space-y-3">
                     {plan.features.map((feature, featureIndex) => (
                       <li 
@@ -170,9 +185,9 @@ export default function PricingPage() {
                         }`}
                       >
                         <Check className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
-                          feature.included ? 'text-green-500' : 'text-muted-foreground'
+                          feature.included ? 'text-green-400' : 'text-gray-600'
                         }`} />
-                        <span className={`text-sm ${
+                        <span className={`text-sm text-gray-300 ${
                           language === 'bn' ? 'bangla-text' : ''
                         }`}>
                           {feature.text}
@@ -200,6 +215,8 @@ export default function PricingPage() {
         {/* FAQ removed per request */}
 
         {/* CTA removed per request */}
+          </div>
+        </div>
       </div>
     </div>
   )

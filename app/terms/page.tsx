@@ -10,23 +10,33 @@ export default function TermsPage() {
   const { t, language } = useI18n()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="h-screen overflow-hidden relative bg-[#0a0a0a] dark:bg-[#0a0a0a]">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}></div>
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+      </div>
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="h-screen overflow-y-auto scrollbar-hide pt-20">
+        <div className="container mx-auto px-4 py-6 md:py-8 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="bg-primary/10 p-4 rounded-full">
-              <FileText className="h-12 w-12 text-primary" />
+        <div className="text-center mb-6 md:mb-8 animate-fade-in-up">
+          <div className="flex justify-center mb-4 animate-scale-in">
+            <div className="p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full border border-blue-500/20 shadow-lg">
+              <FileText className="h-10 w-10 md:h-12 md:w-12 text-blue-400" />
             </div>
           </div>
-          <h1 className={`text-4xl font-bold mb-4 ${
+          <h1 className={`text-2xl md:text-3xl lg:text-4xl font-black text-white mb-4 animation-delay-200 ${
             language === 'bn' ? 'bangla-text' : ''
           }`}>
             {language === 'bn' ? 'সেবার শর্তাবলী' : 'Terms of Service'}
           </h1>
-          <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
+          <div className="flex items-center justify-center space-x-2 text-sm text-gray-400">
             <Calendar className="h-4 w-4" />
             <span className={language === 'bn' ? 'bangla-text' : ''}>
               {language === 'bn' ? 'শেষ আপডেট: ১ সেপ্টেম্বর, ২০২৫' : 'Last updated: September 01, 2025'}
@@ -35,8 +45,9 @@ export default function TermsPage() {
         </div>
 
         {/* Content */}
-        <Card>
-          <CardContent className="prose dark:prose-invert max-w-none pt-6">
+        <Card className="shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden animate-fade-in-up animation-delay-400">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          <CardContent className="prose dark:prose-invert max-w-none pt-6 relative z-10">
             {language === 'bn' ? (
               // Bengali Terms
               <div className="space-y-6 bangla-text">
@@ -218,6 +229,7 @@ export default function TermsPage() {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   )

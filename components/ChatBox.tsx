@@ -5,7 +5,7 @@ import { useI18n } from '@/lib/i18n-provider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Send, Bot, User } from 'lucide-react'
+import { Send, Bot, User, Sparkles } from 'lucide-react'
 
 interface Message {
   id: string
@@ -112,44 +112,62 @@ export function ChatBox({ className }: ChatBoxProps) {
     <Card className={`flex flex-col ${className || ''}`}>
       <CardContent className="flex-1 flex flex-col p-0 min-h-0">
         {/* Messages Area */}
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-          {messages.map((message) => (
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 min-h-0 scrollbar-hide">
+          {messages.map((message, index) => (
               <div
                 key={message.id}
                 className={`flex ${
                   message.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                } animate-fade-in-up`}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div
-                  className={`flex items-start space-x-2 max-w-[80%] ${
-                    message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                  className={`flex items-start gap-3 max-w-[85%] md:max-w-[75%] ${
+                    message.sender === 'user' ? 'flex-row-reverse' : ''
                   }`}
                 >
+                  {/* Avatar with gradient and glow */}
                   <div className={`
-                    flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
+                    flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center relative overflow-hidden
+                    shadow-lg transition-all duration-300 hover:scale-110
                     ${message.sender === 'user' 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-muted text-muted-foreground'
+                      ? 'bg-gradient-to-br from-blue-500 to-purple-600 shadow-blue-500/30' 
+                      : 'bg-gradient-to-br from-gray-700 to-gray-800 shadow-gray-700/30'
                     }
                   `}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                     {message.sender === 'user' ? (
-                      <User className="h-4 w-4" />
+                      <User className="h-5 w-5 text-white relative z-10" />
                     ) : (
-                      <Bot className="h-4 w-4" />
+                      <Sparkles className="h-5 w-5 text-blue-400 relative z-10 animate-pulse" />
                     )}
                   </div>
-                  <div
-                    className={`
-                      rounded-2xl px-4 py-2 break-words whitespace-pre-wrap
-                      ${message.sender === 'assistant' ? 'max-h-48 overflow-y-auto' : ''}
-                      ${message.sender === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
-                      }
-                    `}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                    <p className="text-xs opacity-70 mt-1">
+
+                  {/* Message Bubble */}
+                  <div className="flex flex-col gap-1 flex-1 min-w-0">
+                    <div
+                      className={`
+                        relative rounded-2xl px-5 py-3.5 break-words whitespace-pre-wrap group
+                        ${message.sender === 'user'
+                          ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30'
+                          : 'bg-gradient-to-br from-gray-800/90 to-gray-900/90 text-gray-100 border border-white/5 shadow-lg hover:border-white/10'
+                        }
+                        transition-all duration-300 hover:scale-[1.02]
+                      `}
+                    >
+                      {/* Shine effect on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 rounded-2xl"></div>
+                      
+                      {/* Message Content */}
+                      <p className="text-[15px] leading-relaxed relative z-10 font-medium tracking-wide">
+                        {message.content}
+                      </p>
+                    </div>
+                    
+                    {/* Timestamp */}
+                    <p className={`text-[11px] font-medium tracking-wide px-2 ${
+                      message.sender === 'user' ? 'text-right text-gray-400' : 'text-left text-gray-500'
+                    }`}>
                       {message.timestamp.toLocaleTimeString([], { 
                         hour: '2-digit', 
                         minute: '2-digit' 
@@ -161,13 +179,21 @@ export function ChatBox({ className }: ChatBoxProps) {
             ))}
           
           {isTyping && (
-            <div className="flex justify-start">
-              <div className="flex items-start space-x-2 max-w-[80%]">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
-                  <Bot className="h-4 w-4" />
+            <div className="flex justify-start animate-fade-in-up">
+              <div className="flex items-start gap-3 max-w-[85%] md:max-w-[75%]">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-lg shadow-gray-700/30 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+                  <Sparkles className="h-5 w-5 text-blue-400 relative z-10 animate-pulse" />
                 </div>
-                <div className="bg-muted text-muted-foreground rounded-2xl px-4 py-2">
-                  <p className="text-sm animate-typing">{t('chat.typing')}</p>
+                <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-white/5 rounded-2xl px-5 py-3.5 shadow-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                      <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                      <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    </div>
+                    <p className="text-sm text-gray-400 font-medium">Thinking...</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -176,27 +202,28 @@ export function ChatBox({ className }: ChatBoxProps) {
         </div>
 
         {/* Input Area */}
-        <div className="border-t p-3">
-          <div className="flex items-center">
-            <div className="flex items-center w-full bg-muted/5 border border-muted-foreground/20 rounded-lg transition-transform duration-200 focus-within:scale-[1.03] hover:scale-[1.03] shadow-sm">
+        <div className="border-t border-white/5 p-4 md:p-5 bg-gradient-to-t from-gray-900/50 to-transparent backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center flex-1 bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-white/10 rounded-xl transition-all duration-300 focus-within:border-blue-500/50 focus-within:shadow-lg focus-within:shadow-blue-500/20 hover:border-white/20 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent -translate-x-full group-focus-within:translate-x-full transition-transform duration-700"></div>
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={t('chat.placeholder')}
-                className="flex-1 bg-transparent border-none rounded-l-lg px-4 py-2 placeholder:text-muted-foreground"
+                className="flex-1 bg-transparent border-none rounded-xl px-5 py-3 placeholder:text-gray-500 text-white text-[15px] font-medium focus-visible:ring-0 focus-visible:ring-offset-0 relative z-10 h-12"
                 disabled={isTyping}
               />
-              <Button
-                variant="ghost"
-                onClick={sendMessage}
-                disabled={!inputMessage.trim() || isTyping}
-                size="icon"
-                className="h-10 w-10 p-0 rounded-r-lg bg-muted/10 hover:bg-muted/20 mr-1"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
             </div>
+            <Button
+              variant="ghost"
+              onClick={sendMessage}
+              disabled={!inputMessage.trim() || isTyping}
+              size="icon"
+              className="h-12 w-12 p-0 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 hover:scale-105 transition-all duration-300 flex items-center justify-center flex-shrink-0 group/btn"
+            >
+              <Send className="h-5 w-5 text-white group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-300" />
+            </Button>
           </div>
         </div>
       </CardContent>

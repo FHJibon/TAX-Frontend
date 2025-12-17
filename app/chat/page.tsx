@@ -69,18 +69,28 @@ export default function ChatPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="h-screen overflow-hidden relative bg-[#0a0a0a] dark:bg-[#0a0a0a]">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}></div>
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+      </div>
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="h-screen overflow-y-auto scrollbar-hide pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <MessageSquare className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl md:text-4xl font-bold">
+            <MessageSquare className="h-8 w-8 text-blue-400" />
+            <h1 className="text-3xl md:text-4xl font-black text-white">
               {t('nav.chat')}
             </h1>
           </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Ask me anything about tax filing, calculations, or Bangladesh tax laws. I&apos;m here to help!
           </p>
         </div>
@@ -94,13 +104,16 @@ export default function ChatPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Questions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Lightbulb className="h-5 w-5" />
+            <Card className="shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="flex items-center space-x-2 text-white font-bold">
+                  <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-lg border border-yellow-500/20">
+                    <Lightbulb className="h-5 w-5 text-yellow-400" />
+                  </div>
                   <span>Quick Questions</span>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-400">
                   Click on any question to get started
                 </CardDescription>
               </CardHeader>
@@ -126,10 +139,11 @@ export default function ChatPage() {
             </Card>
 
             {/* Categories */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Help Categories</CardTitle>
-                <CardDescription>
+            <Card className="shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-white font-bold">Help Categories</CardTitle>
+                <CardDescription className="text-gray-400">
                   Browse help by category
                 </CardDescription>
               </CardHeader>
@@ -157,11 +171,12 @@ export default function ChatPage() {
             </Card>
 
             {/* Tips */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">💡 Tips for Better Results</CardTitle>
+            <Card className="shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-sm text-white font-bold">💡 Tips for Better Results</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <CardContent className="space-y-2 text-sm text-gray-400 relative z-10">
                 <div className="flex items-start space-x-2">
                   <span className="text-primary">•</span>
                   <span>Be specific about your tax situation</span>
@@ -181,6 +196,7 @@ export default function ChatPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
         </div>
       </div>
     </div>

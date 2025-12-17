@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useI18n } from '@/lib/i18n-provider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,17 +11,27 @@ import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
   const { t, language } = useI18n()
+  const router = useRouter()
   const [email, setEmail] = React.useState('')
   const [submitted, setSubmitted] = React.useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle password reset logic here
-    setSubmitted(true)
+    // Redirect to verify OTP page
+    router.push(`/verify-otp?type=forgot-password&email=${encodeURIComponent(email)}`)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen relative bg-[#0a0a0a] dark:bg-[#0a0a0a] flex items-center justify-center p-4 pt-20">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}></div>
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+      </div>
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-8">
@@ -30,25 +41,26 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Forgot Password Form */}
-        <Card className="w-full">
-          <CardHeader className="text-center">
-            <CardTitle className={`text-2xl font-bold ${
+        <Card className="w-full shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          <CardHeader className="text-center relative z-10">
+            <CardTitle className={`text-2xl font-bold text-white ${
               language === 'bn' ? 'bangla-text' : ''
             }`}>
               {language === 'bn' ? 'পাসওয়ার্ড ভুলে গেছেন?' : 'Forgot Password?'}
             </CardTitle>
-            <CardDescription className={language === 'bn' ? 'bangla-text' : ''}>
+            <CardDescription className={`${language === 'bn' ? 'bangla-text' : ''} text-gray-400`}>
               {language === 'bn' 
-                ? 'চিন্তা করবেন না! আপনার ইমেইল ঠিকানা লিখুন এবং আমরা আপনাকে পাসওয়ার্ড রিসেট লিংক পাঠাব।' 
-                : "Don't worry! Enter your email address and we'll send you a password reset link."}
+                ? 'আপনার ইমেইল লিখুন' 
+                : "Enter your email address."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative z-10">
             {!submitted ? (
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Email Field */}
                 <div className="space-y-2">
-                  <label className={`text-sm font-medium ${
+                  <label className={`text-sm font-medium text-white ${
                     language === 'bn' ? 'bangla-text' : ''
                   }`}>
                     {language === 'bn' ? 'ইমেইল ঠিকানা' : 'Email Address'}
@@ -68,23 +80,23 @@ export default function ForgotPasswordPage() {
 
                 {/* Submit Button */}
                 <Button type="submit" className="w-full">
-                  {language === 'bn' ? 'রিসেট লিংক পাঠান' : 'Send Reset Link'}
+                  {language === 'bn' ? 'ওটিপি পাঠান' : 'Send OTP'}
                 </Button>
               </form>
             ) : (
               <div className="text-center space-y-4">
                 <div className="flex justify-center">
-                  <div className="bg-green-100 dark:bg-green-900/20 p-4 rounded-full">
-                    <CheckCircle className="h-12 w-12 text-green-600" />
+                  <div className="bg-green-500/20 p-4 rounded-full border border-green-500/20">
+                    <CheckCircle className="h-12 w-12 text-green-400" />
                   </div>
                 </div>
                 <div>
-                  <h3 className={`text-lg font-medium mb-2 ${
+                  <h3 className={`text-lg font-medium text-white mb-2 ${
                     language === 'bn' ? 'bangla-text' : ''
                   }`}>
                     {language === 'bn' ? 'ইমেইল পাঠানো হয়েছে!' : 'Email Sent!'}
                   </h3>
-                  <p className={`text-sm text-muted-foreground ${
+                  <p className={`text-sm text-gray-400 ${
                     language === 'bn' ? 'bangla-text' : ''
                   }`}>
                     {language === 'bn' 
@@ -118,7 +130,7 @@ export default function ForgotPasswordPage() {
         </Card>
 
         {/* Additional Help */}
-        <div className="text-center mt-6 text-sm text-muted-foreground">
+        <div className="text-center mt-6 text-sm text-gray-400 relative z-10">
           <p className={language === 'bn' ? 'bangla-text' : ''}>
             {language === 'bn' 
               ? 'সমস্যা হচ্ছে? আমাদের সাথে যোগাযোগ করুন ' 

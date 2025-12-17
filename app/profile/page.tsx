@@ -17,40 +17,93 @@ import {
   Edit2,
   Lock,
   Globe,
-  Shield
+  Shield,
+  CheckCircle
 } from 'lucide-react'
 
 export default function ProfilePage() {
   const { t, language, setLanguage } = useI18n()
   
   const [isEditing, setIsEditing] = React.useState(false)
+  const [showSaveSuccess, setShowSaveSuccess] = React.useState(false)
   const [profile, setProfile] = React.useState({
     name: 'John Doe',
     email: 'john.doe@example.com',
     phone: '+880 1712-345678',
     address: 'Dhaka, Bangladesh',
-    tin: '123456789012',
+    nid: '',
+    tin: '',
     dateOfBirth: '1990-01-15',
     occupation: 'Software Engineer'
   })
+
+  React.useEffect(() => {
+    // Load profile from localStorage
+    const savedProfile = localStorage.getItem('userProfile')
+    if (savedProfile) {
+      setProfile(JSON.parse(savedProfile))
+    }
+  }, [])
   
   const handleSaveProfile = () => {
-    // Save profile logic here
+    // Save profile to localStorage
+    localStorage.setItem('userProfile', JSON.stringify(profile))
     setIsEditing(false)
+    setShowSaveSuccess(true)
+    
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+      setShowSaveSuccess(false)
+    }, 3000)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="h-screen overflow-hidden relative bg-[#0a0a0a] dark:bg-[#0a0a0a]">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}></div>
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+      </div>
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${
-            language === 'bn' ? 'bangla-text' : ''
-          }`}>
-            {language === 'bn' ? 'প্রোফাইল সেটিংস' : 'Profile Settings'}
-          </h1>
-          <p className={`text-xl text-muted-foreground ${
+      <div className="container mx-auto px-4 max-w-7xl h-screen overflow-y-auto scrollbar-hide pt-20">
+        {/* Success Message */}
+        {showSaveSuccess && (
+          <div className="mb-6 animate-in slide-in-from-top-2 duration-300">
+            <Card className="border-2 border-green-500/30 bg-green-950/20 backdrop-blur-xl">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0" />
+                  <div>
+                    <p className="text-green-400 font-semibold">
+                      {language === 'bn' ? 'প্রোফাইল সফলভাবে সংরক্ষিত হয়েছে!' : 'Profile saved successfully!'}
+                    </p>
+                    <p className="text-sm text-gray-300">
+                      {language === 'bn' ? 'আপনি এখন ডকুমেন্ট আপলোড করতে পারবেন' : 'You can now upload documents'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <div className="text-center mb-6 md:mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl border border-blue-500/20">
+              <User className="h-8 w-8 text-blue-400" />
+            </div>
+            <h1 className={`text-3xl md:text-4xl lg:text-5xl font-black text-white ${
+              language === 'bn' ? 'bangla-text' : ''
+            }`}>
+              {language === 'bn' ? 'প্রোফাইল সেটিংস' : 'Profile Settings'}
+            </h1>
+          </div>
+          <p className={`text-base md:text-lg text-muted-foreground max-w-2xl mx-auto ${
             language === 'bn' ? 'bangla-text' : ''
           }`}>
             {language === 'bn' 
@@ -59,11 +112,12 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-4 md:gap-6 items-start">
           {/* Profile Information */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
             {/* Personal Information */}
-            <Card>
+            <Card className="shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -178,6 +232,50 @@ export default function ProfilePage() {
                       />
                     </div>
                   </div>
+
+                  <div className="space-y-2">
+                    <label className={`text-sm font-medium ${
+                      language === 'bn' ? 'bangla-text' : ''
+                    }`}>
+                      {language === 'bn' ? 'এনআইডি নম্বর' : 'NID Number'}
+                    </label>
+                    <Input
+                      type="text"
+                      value={profile.nid}
+                      onChange={(e) => setProfile({...profile, nid: e.target.value})}
+                      disabled={!isEditing}
+                      placeholder="Enter your National ID"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className={`text-sm font-medium ${
+                      language === 'bn' ? 'bangla-text' : ''
+                    }`}>
+                      {language === 'bn' ? 'টিআইএন নম্বর' : 'TIN Number'}
+                    </label>
+                    <Input
+                      type="text"
+                      value={profile.tin}
+                      onChange={(e) => setProfile({...profile, tin: e.target.value})}
+                      disabled={!isEditing}
+                      placeholder="Enter your TIN"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 md:col-span-2">
+                    <label className={`text-sm font-medium ${
+                      language === 'bn' ? 'bangla-text' : ''
+                    }`}>
+                      {language === 'bn' ? 'পেশা' : 'Occupation'}
+                    </label>
+                    <Input
+                      type="text"
+                      value={profile.occupation}
+                      onChange={(e) => setProfile({...profile, occupation: e.target.value})}
+                      disabled={!isEditing}
+                    />
+                  </div>
                 </div>
 
                 {isEditing && (
@@ -194,60 +292,13 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Tax Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className={`flex items-center space-x-2 ${
-                  language === 'bn' ? 'bangla-text' : ''
-                }`}>
-                  <Building className="h-5 w-5" />
-                  <span>{language === 'bn' ? 'কর তথ্য' : 'Tax Information'}</span>
-                </CardTitle>
-                <CardDescription className={language === 'bn' ? 'bangla-text' : ''}>
-                  {language === 'bn' 
-                    ? 'আপনার কর সম্পর্কিত বিস্তারিত' 
-                    : 'Your tax-related details'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'টিআইএন নম্বর' : 'TIN Number'}
-                    </label>
-                    <Input
-                      type="text"
-                      value={profile.tin}
-                      onChange={(e) => setProfile({...profile, tin: e.target.value})}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className={`text-sm font-medium ${
-                      language === 'bn' ? 'bangla-text' : ''
-                    }`}>
-                      {language === 'bn' ? 'পেশা' : 'Occupation'}
-                    </label>
-                    <Input
-                      type="text"
-                      value={profile.occupation}
-                      onChange={(e) => setProfile({...profile, occupation: e.target.value})}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="flex flex-col space-y-4 md:space-y-6 h-full">
             {/* Language Settings */}
-            <Card>
+            <Card className="shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden flex-1">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               <CardHeader>
                 <CardTitle className={`flex items-center space-x-2 text-sm ${
                   language === 'bn' ? 'bangla-text' : ''
@@ -276,7 +327,8 @@ export default function ProfilePage() {
             </Card>
 
             {/* Security */}
-            <Card>
+            <Card className="shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden flex-1">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               <CardHeader>
                 <CardTitle className={`flex items-center space-x-2 text-sm ${
                   language === 'bn' ? 'bangla-text' : ''
@@ -298,18 +350,17 @@ export default function ProfilePage() {
             </Card>
 
             {/* Account Actions */}
-            <Card>
+            <Card className="shadow-2xl border border-white/5 bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-950/90 backdrop-blur-2xl hover:border-white/10 transition-all duration-700 group relative overflow-hidden flex-1">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               <CardHeader>
-                <CardTitle className={`text-sm ${
+                <CardTitle className={`flex items-center space-x-2 text-sm ${
                   language === 'bn' ? 'bangla-text' : ''
                 }`}>
-                  {language === 'bn' ? 'অ্যাকাউন্ট অ্যাকশন' : 'Account Actions'}
+                  <User className="h-4 w-4" />
+                  <span>{language === 'bn' ? 'অ্যাকাউন্ট অ্যাকশন' : 'Account Actions'}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full">
-                  {language === 'bn' ? 'ডেটা এক্সপোর্ট' : 'Export Data'}
-                </Button>
                 <Button variant="destructive" className="w-full">
                   {language === 'bn' ? 'অ্যাকাউন্ট মুছুন' : 'Delete Account'}
                 </Button>

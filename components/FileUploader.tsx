@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useI18n } from '@/lib/i18n-provider'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+// Removed unused Card imports
 import { Button } from '@/components/ui/button'
 import { Upload, File, X, CheckCircle } from 'lucide-react'
 // animations removed to avoid hydration issues
@@ -171,12 +171,7 @@ export function FileUploader({
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{t('upload.title')}</CardTitle>
-        <CardDescription>{t('upload.subtitle')}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
         {/* Status message */}
         {statusMessage && (
           <div
@@ -233,57 +228,7 @@ export function FileUploader({
           </div>
         )}
 
-        {/* File List */}
-        {files.length > 0 && (
-          <div className="space-y-3">
-            <h4 className="font-medium">Uploaded Files ({files.length})</h4>
-            <div className="max-h-[520px] overflow-auto pr-1 space-y-2">
-              {files.map((file) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-background rounded">
-                      <File className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{file.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatFileSize(file.size)}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    {file.status === 'uploading' && (
-                      <div className="w-20 bg-background rounded-full h-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${file.progress || 0}%` }}
-                        />
-                      </div>
-                    )}
-                    
-                    {file.status === 'success' && (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    )}
-                    
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeFile(file.id)}
-                      className="h-8 w-8"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+    </div>
   )
 }

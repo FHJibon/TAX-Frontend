@@ -68,20 +68,31 @@ export default function CalculatorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="h-screen overflow-hidden relative bg-[#0a0a0a] dark:bg-[#0a0a0a]">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}></div>
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+      </div>
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <CalculatorIcon className="h-8 w-8 text-primary" />
-            <h1 className={`text-3xl md:text-4xl font-bold ${
+      <div className="container mx-auto px-4 max-w-7xl h-screen overflow-y-auto scrollbar-hide pt-20">
+        <div className="text-center mb-6 md:mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl border border-blue-500/20">
+              <CalculatorIcon className="h-8 w-8 text-blue-400" />
+            </div>
+            <h1 className={`text-3xl md:text-4xl lg:text-5xl font-black text-white ${
               language === 'bn' ? 'bangla-text' : ''
             }`}>
               {language === 'bn' ? 'কর ক্যালকুলেটর' : 'Tax Calculator'}
             </h1>
           </div>
-          <p className={`text-xl text-muted-foreground max-w-2xl mx-auto ${
+          <p className={`text-base md:text-lg text-muted-foreground max-w-2xl mx-auto ${
             language === 'bn' ? 'bangla-text' : ''
           }`}>
             {language === 'bn' 
@@ -90,11 +101,11 @@ export default function CalculatorPage() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
           {/* Input Section */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
             {/* Income Section (Only Monthly Salary) */}
-            <Card>
+            <Card className="shadow-xl border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl hover:shadow-2xl transition-all duration-500">
               <CardHeader>
                 <CardTitle className={`flex items-center space-x-2 ${
                   language === 'bn' ? 'bangla-text' : ''
@@ -149,7 +160,7 @@ export default function CalculatorPage() {
           <div className="space-y-6">
             {result ? (
               <>
-                <Card className="bg-primary/5 border-primary">
+                <Card className="shadow-xl border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl hover:shadow-2xl transition-all duration-500">
                   <CardHeader>
                     <CardTitle className={`text-center ${
                       language === 'bn' ? 'bangla-text' : ''
