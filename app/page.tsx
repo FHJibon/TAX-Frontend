@@ -23,6 +23,9 @@ import {
 export default function HomePage() {
   const { t, language } = useI18n()
 
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => { setMounted(true) }, [])
+
   const features = [
     {
       icon: Bot,
@@ -154,8 +157,6 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon
-              const [mounted, setMounted] = React.useState(false);
-              React.useEffect(() => { setMounted(true); }, []);
               return (
                 <div
                   key={index}

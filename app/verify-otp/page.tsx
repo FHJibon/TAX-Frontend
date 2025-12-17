@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useI18n } from '@/lib/i18n-provider'
 import { Navbar } from '@/components/Navbar'
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Shield, ArrowLeft, Mail, CheckCircle, AlertCircle } from 'lucide-react'
 
-export default function VerifyOTPPage() {
+function VerifyOTPInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { t, language } = useI18n()
@@ -221,5 +221,13 @@ export default function VerifyOTPPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}> 
+      <VerifyOTPInner />
+    </Suspense>
   )
 }
