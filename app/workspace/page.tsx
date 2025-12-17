@@ -49,10 +49,8 @@ export default function WorkspacePage() {
     }
   ]
 
-  
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -81,12 +79,12 @@ export default function WorkspacePage() {
             <div className="flex flex-col space-y-3 h-full">
               {/* Interactive Uploader */}
               <div className="flex-1">
-                <FileUploader onFilesUpload={handleFilesUpload} maxFiles={1} hideInfo />
+                <FileUploader onFilesUpload={handleFilesUpload} maxFiles={5} hideInfo />
               </div>
 
               {/* Uploaded Files Status */}
               {uploadedFiles.length > 0 ? (
-                <Card className="flex-1">
+                <Card className="flex-1 animate-none">
                   <CardHeader className="pb-3">
                     <CardTitle className={`text-sm ${
                       language === 'bn' ? 'bangla-text' : ''
@@ -117,7 +115,7 @@ export default function WorkspacePage() {
                   </CardContent>
                 </Card>
               ) : (
-                <Card className="border-dashed flex-1">
+                <Card className="border-dashed flex-1 animate-none">
                   <CardContent className="py-20 text-center h-full flex flex-col items-center justify-center">
                     <Upload className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                     <p className={`text-base font-medium text-muted-foreground mb-2 ${
@@ -145,7 +143,7 @@ export default function WorkspacePage() {
 
             {/* Right: Chat Section */}
             <div className="h-full">
-              <Card className="h-full max-h-[660px]">
+              <Card className="h-full max-h-[660px] animate-none">
                 <CardHeader>
                   <CardTitle className={`flex items-center space-x-2 ${
                     language === 'bn' ? 'bangla-text' : ''

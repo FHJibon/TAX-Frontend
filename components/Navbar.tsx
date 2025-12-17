@@ -85,9 +85,18 @@ export function Navbar() {
               size="icon"
               onClick={toggleLanguage}
               className="relative"
+              aria-label="Toggle language"
             >
-              <Globe className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              <Globe className="h-6 w-6 text-white drop-shadow" />
+              <span
+                className="absolute -top-2 -right-2 text-primary-foreground text-sm font-medium rounded-full h-6 w-6 flex items-center justify-center border-2 shadow-lg z-20 select-none"
+                style={{
+                  background: 'hsl(var(--primary))',
+                  borderColor: 'hsl(var(--primary))',
+                  letterSpacing: '0.5px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)'
+                }}
+              >
                 {language === 'en' ? 'EN' : 'বা'}
               </span>
             </Button>

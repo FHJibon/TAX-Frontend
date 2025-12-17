@@ -34,7 +34,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <I18nProvider>
-            <div className="min-h-screen bg-background font-sans antialiased">
+            <div className="bg-background font-sans antialiased">
               {children}
             </div>
             <Toaster />

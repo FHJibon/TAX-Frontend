@@ -93,8 +93,8 @@ export default function DashboardPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 flex flex-col h-full">
-            {/* My Data */}
-            <Card className="flex-1">
+            {/* My Data (no reload animation) */}
+            <Card className="flex-1 animate-none">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -200,8 +200,8 @@ export default function DashboardPage() {
 
           {/* Sidebar */}
           <div className="flex flex-col h-full">
-            {/* Quick Actions */}
-            <Card>
+            {/* Quick Actions (no reload animation) */}
+            <Card className="animate-none">
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>

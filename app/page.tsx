@@ -128,11 +128,21 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon
+              const [mounted, setMounted] = React.useState(false);
+              React.useEffect(() => { setMounted(true); }, []);
               return (
-                <div key={index}>
-                  <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+                <div
+                  key={index}
+                  style={{
+                    transition: 'transform 0.5s cubic-bezier(.22,1,.36,1), opacity 0.5s cubic-bezier(.22,1,.36,1)',
+                    transitionDelay: mounted ? `${index * 120}ms` : '0ms',
+                    transform: mounted ? 'scale(1)' : 'scale(0.7)',
+                    opacity: mounted ? 1 : 0
+                  }}
+                >
+                  <Card className="h-full hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300">
                     <CardHeader>
-                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.color} flex items-center justify-center mb-4`}>
+                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.color} flex items-center justify-center mb-4 shadow-lg`}>
                         <Icon className="h-6 w-6 text-white" />
                       </div>
                       <CardTitle className={`text-xl ${

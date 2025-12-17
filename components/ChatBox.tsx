@@ -178,7 +178,7 @@ export function ChatBox({ className }: ChatBoxProps) {
         {/* Input Area */}
         <div className="border-t p-3">
           <div className="flex items-center">
-            <div className="flex items-center w-full bg-muted/5 border border-muted-foreground/20 rounded-lg">
+            <div className="flex items-center w-full bg-muted/5 border border-muted-foreground/20 rounded-lg transition-transform duration-200 focus-within:scale-[1.03] hover:scale-[1.03] shadow-sm">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
