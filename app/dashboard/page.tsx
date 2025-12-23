@@ -20,10 +20,13 @@ import {
   
 } from 'lucide-react'
 
+
+import { userAPI } from '@/lib/api'
+
 export default function DashboardPage() {
   const router = useRouter()
   const { t, language } = useI18n()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const [userData, setUserData] = React.useState({
     name: '',
     phone: '',
@@ -34,15 +37,19 @@ export default function DashboardPage() {
     dateOfBirth: '',
     occupation: ''
   })
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState('')
 
   React.useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login')
-    } else {
-      // Load profile data from localStorage
-      const savedProfile = localStorage.getItem('userProfile')
-      if (savedProfile) {
-        const profile = JSON.parse(savedProfile)
+      return
+    }
+    setLoading(true)
+    setError('')
+    userAPI.getProfile()
+      .then((res) => {
+        const profile = res.data
         setUserData({
           name: profile.name || '',
           phone: profile.phone || '',
@@ -50,19 +57,71 @@ export default function DashboardPage() {
           address: profile.address || '',
           tin: profile.tin || '',
           nid: profile.nid || '',
-          dateOfBirth: profile.dateOfBirth || '',
+          // Backend returns `date_of_birth` (snake_case)
+          dateOfBirth: profile.date_of_birth || '',
           occupation: profile.occupation || ''
         })
-      }
-    }
-  }, [isAuthenticated, router])
+        // Optionally update localStorage for other pages, using the
+        // same camelCase shape other pages expect (dateOfBirth).
+        const cachedProfile = {
+          name: profile.name || '',
+          email: profile.email || '',
+          nid: profile.nid || '',
+          tin: profile.tin || '',
+          dateOfBirth: profile.date_of_birth || '',
+          phone: profile.phone || '',
+          address: profile.address || '',
+          occupation: profile.occupation || ''
+        }
+        localStorage.setItem('userProfile', JSON.stringify(cachedProfile))
+        setLoading(false)
+      })
+      .catch(() => {
+        // Fallback to localStorage if backend fails
+        const savedProfile = localStorage.getItem('userProfile')
+        if (savedProfile) {
+          const profile = JSON.parse(savedProfile)
+          setUserData({
+            name: profile.name || '',
+            phone: profile.phone || '',
+            email: profile.email || '',
+            address: profile.address || '',
+            tin: profile.tin || '',
+            nid: profile.nid || '',
+            dateOfBirth: profile.dateOfBirth || '',
+            occupation: profile.occupation || ''
+          })
+        } else {
+          setUserData(prev => ({
+            ...prev,
+            name: (user?.name ?? prev.name) || '',
+            email: (user?.email ?? prev.email) || '',
+          }))
+        }
+        setError('Failed to load profile from backend.')
+        setLoading(false)
+      })
+  }, [isAuthenticated, user, router])
+
 
   if (!isAuthenticated) {
     return null
   }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#0a0a0a]">
+        <span className="text-white text-lg">{t('common.loading') || 'Loading...'}</span>
+      </div>
+    )
+  }
 
   return (
       <div className="h-screen overflow-hidden relative bg-[#0a0a0a] dark:bg-[#0a0a0a]">
+        {error && (
+          <div className="absolute top-0 left-0 w-full bg-blue-600 text-white text-center py-2 z-50">
+            {error}
+          </div>
+        )}
         {/* Animated grid background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0" style={{
@@ -72,7 +131,7 @@ export default function DashboardPage() {
           }}></div>
           {/* Gradient orbs */}
           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
-          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-float-slow"></div>
           <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-cyan-600/10 rounded-full blur-[100px] opacity-50"></div>
         </div>
         
@@ -95,16 +154,16 @@ export default function DashboardPage() {
                    <h1 className={`text-4xl md:text-5xl font-black flex items-center gap-4 tracking-tight text-white animate-fade-in-up animation-delay-200 ${
                     language === 'bn' ? 'bangla-text' : ''
                   }`}>
-                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl border border-blue-500/20 animate-scale-in animation-delay-200 shadow-lg shadow-blue-500/10">
+                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-500/20 rounded-2xl border border-blue-500/20 animate-scale-in animation-delay-200 shadow-lg shadow-blue-500/10">
                       <User className="h-8 w-8 text-blue-400" />
                     </div>
                     {language === 'bn' ? 'আমার তথ্য' : 'My Data'}
                   </h1>
-                  <p className={`text-base text-gray-400 animate-fade-in-up animation-delay-400 ${
+                  <p className={`text-base text-white/80 animate-fade-in-up animation-delay-400 ${
                     language === 'bn' ? 'bangla-text' : ''
-                  }`}>{language === 'bn' ? 'আপনার ব্যক্তিগত তথ্য এবং প্রোফাইল বিবরণ' : 'Your personal information and profile details'}</p>
+                  }`}>{language === 'bn' ? 'আপনার ব্যক্তিগত তথ্য এবং প্রোফাইল বিবরণ' : 'Personal Information & Identification'}</p>
                 </div>
-                <Button variant="outline" size="lg" className={`text-base px-8 py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300 group/btn font-semibold animate-fade-in-scale animation-delay-600 ${
+                <Button variant="outline" size="lg" className={`text-base px-8 py-6 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-500 text-white border-0 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300 group/btn font-semibold animate-fade-in-scale animation-delay-600 ${
                   language === 'bn' ? 'bangla-text' : ''
                 }`} onClick={() => router.push('/profile')}>
                   <Edit className="h-5 w-5 mr-2 group-hover/btn:rotate-12 transition-transform" />
@@ -117,7 +176,7 @@ export default function DashboardPage() {
                 {/* Full Name */}
                 <div className="flex items-start gap-5 rounded-2xl border border-white/5 bg-gradient-to-br from-gray-800/40 to-gray-900/40 p-6 hover:border-blue-500/30 hover:bg-gradient-to-br hover:from-gray-800/60 hover:to-gray-900/60 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 group backdrop-blur-sm relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                  <div className="p-3.5 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-blue-500/20 shadow-lg shadow-blue-500/10 relative z-10">
+                  <div className="p-3.5 bg-gradient-to-br from-blue-500/20 to-blue-500/20 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-blue-500/20 shadow-lg shadow-blue-500/10 relative z-10">
                     <User className="h-6 w-6 text-blue-400" />
                   </div>
                   <div className="relative z-10">
@@ -125,7 +184,7 @@ export default function DashboardPage() {
                       {language === 'bn' ? 'পূর্ণ নাম' : 'Full Name'}
                     </p>
                     <p className={`font-bold text-xl text-white ${language === 'bn' ? 'bangla-text' : ''}`}>
-                      {userData.name || '—'}
+                      {userData.name || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -141,7 +200,7 @@ export default function DashboardPage() {
                       {language === 'bn' ? 'মোবাইল নম্বর' : 'Phone Number'}
                     </p>
                     <p className={`font-bold text-xl text-white ${language === 'bn' ? 'bangla-text' : ''}`}>
-                      {userData.phone || '—'}
+                      {userData.phone || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -149,15 +208,15 @@ export default function DashboardPage() {
                 {/* Email Address */}
                 <div className="flex items-start gap-5 rounded-2xl border border-white/5 bg-gradient-to-br from-gray-800/40 to-gray-900/40 p-6 hover:border-blue-500/30 hover:bg-gradient-to-br hover:from-gray-800/60 hover:to-gray-900/60 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 group backdrop-blur-sm relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                  <div className="p-3.5 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-purple-500/20 shadow-lg shadow-purple-500/10 relative z-10">
-                    <Mail className="h-6 w-6 text-purple-400" />
+                  <div className="p-3.5 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-blue-500/20 shadow-lg shadow-blue-500/10 relative z-10">
+                    <Mail className="h-6 w-6 text-blue-400" />
                   </div>
                   <div className="relative z-10">
                     <p className={`text-sm font-medium text-gray-500 mb-1 ${language === 'bn' ? 'bangla-text' : ''}`}>
                       {language === 'bn' ? 'ইমেইল ঠিকানা' : 'Email Address'}
                     </p>
                     <p className={`font-bold text-xl text-white ${language === 'bn' ? 'bangla-text' : ''}`}>
-                      {userData.email || '—'}
+                      {userData.email || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -165,7 +224,7 @@ export default function DashboardPage() {
                 {/* Address */}
                 <div className="flex items-start gap-5 rounded-2xl border border-white/5 bg-gradient-to-br from-gray-800/40 to-gray-900/40 p-6 hover:border-blue-500/30 hover:bg-gradient-to-br hover:from-gray-800/60 hover:to-gray-900/60 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 group backdrop-blur-sm relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                  <div className="p-3.5 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-orange-500/20 shadow-lg shadow-orange-500/10 relative z-10">
+                  <div className="p-3.5 bg-gradient-to-br from-orange-500/20 to-orange-500/10 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-orange-500/20 shadow-lg shadow-orange-500/10 relative z-10">
                     <MapPin className="h-6 w-6 text-orange-400" />
                   </div>
                   <div className="relative z-10">
@@ -173,7 +232,7 @@ export default function DashboardPage() {
                       {language === 'bn' ? 'ঠিকানা' : 'Address'}
                     </p>
                     <p className={`font-bold text-xl text-white ${language === 'bn' ? 'bangla-text' : ''}`}>
-                      {userData.address || '—'}
+                      {userData.address || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -189,7 +248,7 @@ export default function DashboardPage() {
                       {language === 'bn' ? 'টিআইএন নম্বর' : 'TIN Number'}
                     </p>
                     <p className={`font-bold text-xl text-white ${language === 'bn' ? 'bangla-text' : ''}`}>
-                      {userData.tin || '—'}
+                      {userData.tin || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -197,7 +256,7 @@ export default function DashboardPage() {
                 {/* NID Number */}
                 <div className="flex items-start gap-5 rounded-2xl border border-white/5 bg-gradient-to-br from-gray-800/40 to-gray-900/40 p-6 hover:border-blue-500/30 hover:bg-gradient-to-br hover:from-gray-800/60 hover:to-gray-900/60 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 group backdrop-blur-sm relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                  <div className="p-3.5 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-indigo-500/20 shadow-lg shadow-indigo-500/10 relative z-10">
+                  <div className="p-3.5 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-indigo-500/20 shadow-lg shadow-indigo-500/10 relative z-10">
                     <CreditCard className="h-6 w-6 text-indigo-400" />
                   </div>
                   <div className="relative z-10">
@@ -205,7 +264,7 @@ export default function DashboardPage() {
                       {language === 'bn' ? 'এনআইডি নম্বর' : 'NID Number'}
                     </p>
                     <p className={`font-bold text-xl text-white ${language === 'bn' ? 'bangla-text' : ''}`}>
-                      {userData.nid || '—'}
+                      {userData.nid || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -221,7 +280,7 @@ export default function DashboardPage() {
                       {language === 'bn' ? 'জন্ম তারিখ' : 'Date of Birth'}
                     </p>
                     <p className={`font-bold text-xl text-white ${language === 'bn' ? 'bangla-text' : ''}`}>
-                      {userData.dateOfBirth ? new Date(userData.dateOfBirth).toLocaleDateString('en-GB', { timeZone: 'UTC' }) : '—'}
+                      {userData.dateOfBirth ? new Date(userData.dateOfBirth).toLocaleDateString('en-GB', { timeZone: 'UTC' }) : 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -237,7 +296,7 @@ export default function DashboardPage() {
                       {language === 'bn' ? 'পেশা' : 'Occupation'}
                     </p>
                     <p className={`font-bold text-xl text-white ${language === 'bn' ? 'bangla-text' : ''}`}>
-                      {userData.occupation || '—'}
+                      {userData.occupation || 'N/A'}
                     </p>
                   </div>
                 </div>

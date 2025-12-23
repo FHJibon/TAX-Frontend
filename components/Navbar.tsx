@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useI18n } from '@/lib/i18n-provider'
 import { useAuth } from '@/lib/auth-provider'
@@ -40,18 +41,16 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3 group">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl blur-md opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                <img src="/logo.svg" alt="Logo" className="h-10 w-10 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl blur-md opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                <Image src="/logo.svg" alt="Logo" width={40} height={40} className="h-10 w-10 relative z-10 group-hover:scale-110 transition-transform duration-300" />
               </div>
               <span className="text-lg font-bold text-white hidden md:block">Tax Assistant</span>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {navigation.map((item) => {
               const Icon = item.icon
@@ -76,9 +75,7 @@ export function Navbar() {
             })}
           </div>
           
-          {/* Right Side Actions */}
           <div className="hidden md:flex items-center space-x-2">
-            {/* Language Toggle */}
             <Button
               variant="ghost"
               size="icon"
@@ -87,12 +84,11 @@ export function Navbar() {
               aria-label="Toggle language"
             >
               <Globe className="h-4 w-4 text-gray-400 group-hover:text-white transition-colors" />
-              <span className="absolute -top-1 -right-1 bg-gradient-to-br from-blue-600 to-purple-600 text-white text-[10px] font-bold rounded-md px-1.5 py-0.5 shadow-lg">
+              <span className="absolute -top-1 -right-1 bg-gradient-to-br from-blue-600 to-blue-800 text-white text-[10px] font-bold rounded-md px-1.5 py-0.5 shadow-lg">
                 {language === 'en' ? 'EN' : 'বা'}
               </span>
             </Button>
 
-            {/* Auth Buttons */}
             {isAuthenticated ? (
               <div className="relative">
                 <Button
@@ -100,7 +96,6 @@ export function Navbar() {
                   className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 hover:text-white transition-all duration-300 rounded-lg px-4 py-2 h-9"
                 >
                   <User className="h-4 w-4" />
-                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${showProfileMenu ? 'rotate-180' : ''}`} />
                 </Button>
                 
                 {/* Profile Dropdown */}
@@ -139,7 +134,7 @@ export function Navbar() {
                 </Link>
                 
                 <Link href="/signup">
-                  <Button className="bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 hover:scale-105 transition-all duration-300 rounded-lg px-4 py-2 h-9 text-sm font-medium">
+                  <Button className="bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-500 text-white border-0 shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 hover:scale-105 transition-all duration-300 rounded-lg px-4 py-2 h-9 text-sm font-medium">
                     {t('nav.signup')}
                   </Button>
                 </Link>
@@ -165,7 +160,6 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-white/5 bg-[#0a0a0a]/95 backdrop-blur-xl">
           <div className="px-4 py-4 space-y-2">
@@ -237,7 +231,7 @@ export function Navbar() {
                     </Button>
                   </Link>
                   <Link href="/signup" className="block w-full">
-                    <Button className="w-full bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-blue-600/20 rounded-lg h-10 text-sm font-medium">
+                    <Button className="w-full bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-500 text-white border-0 shadow-lg shadow-blue-600/20 rounded-lg h-10 text-sm font-medium">
                       {t('nav.signup')}
                     </Button>
                   </Link>

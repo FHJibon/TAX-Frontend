@@ -1,18 +1,34 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosInstance, AxiosResponse } from 'axios'
 
-// Create axios instance with default config
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
-  timeout: 10000,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Add auth token if available
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      const headers: any = config.headers || {}
+      try {
+        if (headers && typeof headers.delete === 'function') {
+          headers.delete('Content-Type')
+        }
+      } catch {
+      }
+      if (headers) {
+        delete headers['Content-Type']
+        delete headers['content-type']
+        if (headers.common) {
+          delete headers.common['Content-Type']
+          delete headers.common['content-type']
+        }
+      }
+      config.headers = headers
+    }
+
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -24,24 +40,29 @@ api.interceptors.request.use(
   }
 )
 
-// Response interceptor
 api.interceptors.response.use(
   (response: AxiosResponse) => {
     return response
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('token')
-        window.location.href = '/login'
+        const token = localStorage.getItem('token')
+        if (token) {
+          localStorage.removeItem('userProfile')
+          localStorage.removeItem('userEmail')
+          localStorage.removeItem('userName')
+          localStorage.removeItem('token')
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login'
+          }
+        }
       }
     }
     return Promise.reject(error)
   }
 )
 
-// API endpoints
 export const authAPI = {
   login: (credentials: { email: string; password: string }) =>
     api.post('/auth/login', credentials),
@@ -49,84 +70,79 @@ export const authAPI = {
   register: (userData: { name: string; email: string; password: string }) =>
     api.post('/auth/register', userData),
   
-  logout: () => api.post('/auth/logout'),
+  logout: () => Promise.resolve({ data: { message: 'logged out' } } as AxiosResponse),
   
   forgotPassword: (email: string) =>
     api.post('/auth/forgot-password', { email }),
   
-  resetPassword: (token: string, password: string) =>
-    api.post('/auth/reset-password', { token, password }),
+  resetPassword: (email: string, code: string, newPassword: string) =>
+    api.post('/auth/reset-password', { email, code, new_password: newPassword }),
+
+  verifySignup: (email: string, code: string) =>
+    api.post('/auth/verify', { email, code }),
+
+  me: () => api.get('/auth/me'),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post('/auth/change-password', { current_password: currentPassword, new_password: newPassword }),
+
+  deleteAccount: (confirm: boolean = true) =>
+    api.post('/auth/delete-account', { confirm }),
 }
 
 export const taxAPI = {
-  // Chat endpoints
-  sendChatMessage: (message: string, sessionId?: string) =>
-    api.post('/chat/message', { message, sessionId }),
-  
-  getChatHistory: (sessionId: string) =>
-    api.get(`/chat/history/${sessionId}`),
-  
-  // Document upload endpoints
-  uploadDocument: (file: FormData) =>
-    api.post('/documents/upload', file, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    }),
-  
-  getDocuments: () => api.get('/documents'),
-  
-  deleteDocument: (documentId: string) =>
-    api.delete(`/documents/${documentId}`),
-  
-  // Tax calculation endpoints
-  calculateTax: (taxData: any) =>
-    api.post('/tax/calculate', taxData),
-  
-  getTaxReturns: () => api.get('/tax/returns'),
-  
-  createTaxReturn: (returnData: any) =>
-    api.post('/tax/returns', returnData),
-  
-  updateTaxReturn: (returnId: string, returnData: any) =>
-    api.put(`/tax/returns/${returnId}`, returnData),
-  
-  submitTaxReturn: (returnId: string) =>
-    api.post(`/tax/returns/${returnId}/submit`),
+  sendChatMessage: (
+    message: string,
+    topK: number = 5,
+    timeoutMs: number = 30000,
+    voiceTranscript?: string | null
+  ) =>
+    api.post(
+      '/chat/',
+      { message, top_k: topK, voice_transcript: voiceTranscript || undefined },
+      { timeout: timeoutMs }
+    ),
+  getHistory: () => api.get('/chat/history'),
+  terminateSession: () => api.post('/chat/terminate'),
+  generateTaxReturn: (timeoutMs: number = 60000) =>
+    api.get('/generate/tax-return', { responseType: 'blob', timeout: timeoutMs }),
+  generateTaxReturnFromForm: (payload: any, timeoutMs: number = 60000) =>
+    api.post('/generate/tax-return', payload, { responseType: 'blob', timeout: timeoutMs }),
+}
+
+export const speechAPI = {
+  transcribe: (audioBlob: Blob, filename: string = 'voice.webm', timeoutMs: number = 120000) => {
+    const form = new FormData()
+    form.append('audio', audioBlob, filename)
+    return api.post('/speech/transcribe', form, { timeout: timeoutMs })
+  },
+}
+
+export const uploadAPI = {
+  getStatus: () => api.get('/upload/status'),
 }
 
 export const userAPI = {
-  getProfile: () => api.get('/user/profile'),
-  
+  getProfile: () =>
+    api.get('/user/profile'),
   updateProfile: (profileData: any) =>
     api.put('/user/profile', profileData),
-  
-  getDashboard: () => api.get('/user/dashboard'),
-  
-  getNotifications: () => api.get('/user/notifications'),
-  
-  markNotificationRead: (notificationId: string) =>
-    api.put(`/user/notifications/${notificationId}/read`),
 }
 
-// Utility functions
 export const handleApiError = (error: any) => {
   if (error.response) {
-    // Server responded with error status
     return {
       message: error.response.data?.message || 'An error occurred',
       status: error.response.status,
       data: error.response.data,
     }
   } else if (error.request) {
-    // Request was made but no response received
     return {
       message: 'Network error. Please check your connection.',
       status: 0,
       data: null,
     }
   } else {
-    // Something else happened
     return {
       message: error.message || 'An unexpected error occurred',
       status: 0,

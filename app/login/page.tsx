@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useI18n } from '@/lib/i18n-provider'
 import { useAuth } from '@/lib/auth-provider'
@@ -16,21 +17,33 @@ export default function LoginPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = React.useState(false)
   const [error, setError] = React.useState('')
+  const [isLoading, setIsLoading] = React.useState(false)
   const [formData, setFormData] = React.useState({
     email: '',
     password: ''
   })
+  const [emailTouched, setEmailTouched] = React.useState(false)
+  const [passwordTouched, setPasswordTouched] = React.useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const isValidEmail = (value: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    
-    const success = login(formData.email, formData.password)
-    if (success) {
-      router.push('/dashboard')
-    } else {
-      setError('Invalid email or password')
+    setIsLoading(true)
+    try {
+      const success = await login(formData.email, formData.password)
+      if (success) {
+        router.push('/dashboard')
+      } else {
+        setError('Invalid email or password')
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.')
     }
+    setIsLoading(false)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,13 +63,13 @@ export default function LoginPage() {
           backgroundSize: '50px 50px'
         }}></div>
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-float-slow"></div>
       </div>
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-6 md:mb-8 animate-scale-in">
           <Link href="/">
-            <img src="/logo.svg" alt="Logo" className="h-14 w-14 md:h-16 md:w-16 rounded-xl shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300" />
+            <Image src="/logo.svg" alt="Logo" width={64} height={64} className="h-14 w-14 md:h-16 md:w-16 rounded-xl shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300" />
           </Link>
         </div>
 
@@ -92,11 +105,16 @@ export default function LoginPage() {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
+                    onBlur={() => setEmailTouched(true)}
                     placeholder="Enter your email"
                     className="pl-10"
                     required
+                    disabled={isLoading}
                   />
                 </div>
+                {emailTouched && formData.email && !isValidEmail(formData.email) && (
+                  <div className="text-sm text-red-400">Enter a valid email address</div>
+                )}
               </div>
 
               {/* Password Field */}
@@ -111,9 +129,11 @@ export default function LoginPage() {
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
+                    onBlur={() => setPasswordTouched(true)}
                     placeholder="Enter your password"
                     className="pl-10 pr-10"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -127,6 +147,9 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
+                {passwordTouched && formData.password && formData.password.length < 8 && (
+                  <div className="text-sm text-red-400">Password must be at least 8 characters</div>
+                )}
               </div>
 
               {/* Forgot Password */}
@@ -137,8 +160,23 @@ export default function LoginPage() {
               </div>
 
               {/* Login Button */}
-              <Button type="submit" className="w-full">
-                {t('auth.loginButton')}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={
+                  isLoading || !isValidEmail(formData.email) || formData.password.length < 8
+                }
+              >
+                <div className="flex items-center justify-center gap-3">
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <span className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin" />
+                      <span>{t('common.loading')}</span>
+                    </div>
+                  ) : (
+                    <span>{t('auth.loginButton')}</span>
+                  )}
+                </div>
               </Button>
             </form>
 

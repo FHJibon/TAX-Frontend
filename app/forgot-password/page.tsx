@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useI18n } from '@/lib/i18n-provider'
 import { Button } from '@/components/ui/button'
@@ -14,11 +15,26 @@ export default function ForgotPasswordPage() {
   const router = useRouter()
   const [email, setEmail] = React.useState('')
   const [submitted, setSubmitted] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [emailTouched, setEmailTouched] = React.useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Redirect to verify OTP page
-    router.push(`/verify-otp?type=forgot-password&email=${encodeURIComponent(email)}`)
+    setIsLoading(true)
+    try {
+      const { authAPI } = await import('@/lib/api')
+      const res = await authAPI.forgotPassword(email)
+      if (res.status === 200) {
+        router.push(`/verify-otp?type=forgot-password&email=${encodeURIComponent(email)}`)
+      } else {
+        alert(language === 'bn' ? 'ওটিপি পাঠাতে ব্যর্থ' : 'Failed to send OTP')
+      }
+    } catch (err) {
+      alert(language === 'bn' ? 'ওটিপি পাঠাতে ব্যর্থ' : 'Failed to send OTP')
+    }
+    setIsLoading(false)
   }
 
   return (
@@ -30,13 +46,13 @@ export default function ForgotPasswordPage() {
           backgroundSize: '50px 50px'
         }}></div>
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-float-slow"></div>
       </div>
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <Link href="/">
-            <img src="/logo.svg" alt="Logo" className="h-16 w-16 rounded-xl shadow-lg hover:shadow-xl transition-shadow" />
+            <Image src="/logo.svg" alt="Logo" width={64} height={64} className="h-16 w-16 rounded-xl shadow-lg hover:shadow-xl transition-shadow" />
           </Link>
         </div>
 
@@ -71,16 +87,30 @@ export default function ForgotPasswordPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      onBlur={() => setEmailTouched(true)}
                       placeholder={language === 'bn' ? 'আপনার ইমেইল লিখুন' : 'Enter your email'}
                       className="pl-10"
+                      disabled={isLoading}
                       required
                     />
                   </div>
+                  {emailTouched && email && !isValidEmail(email) && (
+                    <div className="text-sm text-red-400">
+                      {language === 'bn' ? 'সঠিক ইমেইল দিন' : 'Enter a valid email address'}
+                    </div>
+                  )}
                 </div>
 
                 {/* Submit Button */}
-                <Button type="submit" className="w-full">
-                  {language === 'bn' ? 'ওটিপি পাঠান' : 'Send OTP'}
+                <Button type="submit" className="w-full" disabled={isLoading || !isValidEmail(email)}>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin" />
+                      <span>{language === 'bn' ? 'লোড হচ্ছে...' : 'Sending...'}</span>
+                    </div>
+                  ) : (
+                    language === 'bn' ? 'ওটিপি পাঠান' : 'Send OTP'
+                  )}
                 </Button>
               </form>
             ) : (

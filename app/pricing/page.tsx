@@ -21,8 +21,8 @@ export default function PricingPage() {
         ? 'ব্যক্তিগত ব্যবহারের জন্য আদর্শ' 
         : 'Perfect for personal use',
       icon: Sparkles,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10',
+      color: 'text-green-500',
+      bgColor: 'bg-green-500/10',
       features: [
         { text: language === 'bn' ? 'বছরে ১টি কর রিটার্ন' : '1 tax return per year', included: true },
         { text: language === 'bn' ? 'মৌলিক এআই সহায়তা' : 'Basic AI assistance', included: true },
@@ -45,8 +45,8 @@ export default function PricingPage() {
         ? 'পেশাদার ও ব্যবসার জন্য' 
         : 'For professionals & businesses',
       icon: Zap,
-      color: 'text-purple-500',
-      bgColor: 'bg-purple-500/10',
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10',
       features: [
         { text: language === 'bn' ? 'সীমাহীন কর রিটার্ন' : 'Unlimited tax returns', included: true },
         { text: language === 'bn' ? 'উন্নত এআই সহায়তা' : 'Advanced AI assistance', included: true },
@@ -94,7 +94,7 @@ export default function PricingPage() {
           backgroundSize: '50px 50px'
         }}></div>
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-float-slow"></div>
       </div>
       <Navbar />
       
@@ -135,7 +135,7 @@ export default function PricingPage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
                     <span className={`px-4 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full ${
                       language === 'bn' ? 'bangla-text' : ''
                     }`}>
@@ -144,7 +144,7 @@ export default function PricingPage() {
                   </div>
                 )}
                 
-                <CardHeader className="text-center pb-8 relative z-10">
+                <CardHeader className={`text-center pb-8 relative z-10 ${plan.popular ? 'pt-12' : ''}`}>
                   <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${plan.bgColor} flex items-center justify-center border border-white/10`}>
                     <Icon className={`h-8 w-8 ${plan.color}`} />
                   </div>

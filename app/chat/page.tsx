@@ -58,7 +58,7 @@ export default function ChatPage() {
       icon: BookOpen,
       title: "Tax Laws",
       description: "Get information about tax regulations",
-      color: "bg-purple-50 text-purple-600 dark:bg-purple-900/20"
+      color: "bg-blue-50 text-blue-600 dark:bg-blue-900/20"
     },
     {
       icon: HelpCircle,
@@ -77,7 +77,7 @@ export default function ChatPage() {
           backgroundSize: '50px 50px'
         }}></div>
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-float-slow"></div>
       </div>
       <Navbar />
       
@@ -127,11 +127,9 @@ export default function ChatPage() {
                       // In a real implementation, this would send the question to the chat
                     }}
                   >
-                    <div className="text-sm">
-                      <div className="font-medium mb-1">{item.question}</div>
-                      <div className="text-muted-foreground text-xs bangla-text">
-                        {item.bangla}
-                      </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-white">{item.question}</span>
+                      <span className="text-xs text-gray-400">{item.bangla}</span>
                     </div>
                   </Button>
                 ))}

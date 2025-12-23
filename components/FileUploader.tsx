@@ -4,7 +4,10 @@ import React from 'react'
 import { useI18n } from '@/lib/i18n-provider'
 // Removed unused Card imports
 import { Button } from '@/components/ui/button'
-import { Upload, File, X, CheckCircle } from 'lucide-react'
+import api from '@/lib/api'
+import Link from 'next/link'
+import { Modal } from '@/components/ui/modal'
+import { Upload } from 'lucide-react'
 // animations removed to avoid hydration issues
 
 interface FileItem {
@@ -14,6 +17,7 @@ interface FileItem {
   type: string
   status: 'uploading' | 'success' | 'error'
   progress?: number
+  docType?: string
 }
 
 interface FileUploaderProps {
@@ -23,15 +27,21 @@ interface FileUploaderProps {
   maxSize?: number // in MB
   hideInfo?: boolean
   showSizeNote?: boolean
+  onSummarizingChange?: (active: boolean) => void
+  onUploadComplete?: () => void
+  onDocumentClassified?: (docType: string | null) => void
 }
 
 export function FileUploader({ 
-  onFilesUpload, 
+  onFilesUpload,
   acceptedTypes = ['.pdf', '.jpg', '.jpeg', '.png', 'application/pdf', 'image/jpeg', 'image/png'],
-  maxFiles = 5,
+  maxFiles = 10,
   maxSize = 5,
   hideInfo = false,
   showSizeNote = true,
+  onSummarizingChange,
+  onUploadComplete,
+  onDocumentClassified,
 }: FileUploaderProps) {
   const { t } = useI18n()
   const [files, setFiles] = React.useState<FileItem[]>([])
@@ -39,6 +49,10 @@ export function FileUploader({
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const [statusMessage, setStatusMessage] = React.useState<string>("")
   const [statusType, setStatusType] = React.useState<'info' | 'error' | 'success'>("info")
+  const [showPopup, setShowPopup] = React.useState(false)
+  const [popupMessage, setPopupMessage] = React.useState('')
+  const [showLimitPopup, setShowLimitPopup] = React.useState(false)
+  const [limitPopupMessage, setLimitPopupMessage] = React.useState('')
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes'
@@ -73,8 +87,8 @@ export function FileUploader({
   const processFiles = (newFiles: File[]) => {
     // Enforce max files
     if (files.length + newFiles.length > maxFiles) {
-      setStatusMessage(`You can only upload up to ${maxFiles} files`)
-      setStatusType('error')
+      setLimitPopupMessage(`You can only upload up to ${maxFiles} files.`)
+      setShowLimitPopup(true)
       return
     }
 
@@ -127,39 +141,82 @@ export function FileUploader({
     }))
 
     setFiles(prev => [...prev, ...fileItems])
-    setStatusMessage(
-      `${validFiles.length} file${validFiles.length > 1 ? 's' : ''} added${rejected.length ? `. Skipped: ${rejected.map(r => r.name).join(', ')}` : ''}`
-    )
-    setStatusType('success')
+    // For successful additions we keep the UI quiet to avoid
+    // the upload card growing; only errors will show messages.
+    setStatusMessage('')
+    setStatusType('info')
 
-    // Simulate upload process
+    // Upload to backend
     fileItems.forEach((fileItem, index) => {
-      simulateUpload(fileItem.id, validFiles[index])
+      uploadFile(fileItem.id, validFiles[index])
     })
 
     onFilesUpload?.(validFiles)
   }
 
-  const simulateUpload = (fileId: string, file: File) => {
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += Math.random() * 30
-      if (progress >= 100) {
-        progress = 100
-        clearInterval(interval)
-        setFiles(prev => prev.map(f => 
-          f.id === fileId 
-            ? { ...f, status: 'success', progress: 100 }
-            : f
-        ))
-      } else {
-        setFiles(prev => prev.map(f => 
-          f.id === fileId 
-            ? { ...f, progress }
-            : f
-        ))
+  const uploadFile = async (fileId: string, file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    try {
+      // Show summarizing indicator
+      onSummarizingChange?.(true)
+      
+      // Upload file to backend
+      const res = await api.post('/upload/', formData, {
+        // Don't set Content-Type manually; the browser adds the correct multipart boundary.
+        timeout: 120000,
+        onUploadProgress: (e) => {
+          const total = e.total || file.size
+          const progress = total ? Math.round((e.loaded * 100) / total) : 0
+          setFiles(prev => prev.map(f =>
+            f.id === fileId ? { ...f, progress } : f
+          ))
+        }
+      })
+      
+      const docType = (res?.data?.doc_type as string | undefined) || undefined
+
+      // Mark file as successfully uploaded
+      setFiles(prev => prev.map(f => 
+        f.id === fileId 
+          ? { ...f, status: 'success', progress: 100, docType }
+          : f
+      ))
+      
+      setStatusMessage('')
+      setStatusType('info')
+      
+      // Update document type status (triggers green tick in workspace)
+      if (docType && docType !== 'unknown') {
+        onDocumentClassified?.(docType)
       }
-    }, 200)
+      
+      // Trigger chat history reload (shows summary immediately)
+      onUploadComplete?.()
+      
+    } catch (err: any) {
+      const code = err?.response?.status
+      const detail = err?.response?.data?.detail || 'Failed to upload'
+
+      // Show profile completion popup for 400 errors
+      if (code === 400 && typeof detail === 'string' && detail.includes('Complete profile')) {
+        setPopupMessage(detail)
+        setShowPopup(true)
+      } else {
+        console.error('Upload failed:', detail)
+      }
+
+      // Mark file as failed
+      setFiles(prev => prev.map(f => 
+        f.id === fileId 
+          ? { ...f, status: 'error' }
+          : f
+      ))
+    } finally {
+      // Hide summarizing indicator
+      onSummarizingChange?.(false)
+    }
   }
 
   const removeFile = (fileId: string) => {
@@ -171,16 +228,13 @@ export function FileUploader({
   }
 
   return (
+    <>
     <div className="space-y-4">
         {/* Status message */}
-        {statusMessage && (
+        {statusMessage && statusType === 'error' && (
           <div
             className={`text-sm rounded-md px-3 py-2 ${
-              statusType === 'error'
-                ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-                : statusType === 'success'
-                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
-                : 'bg-muted text-foreground'
+              'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
             }`}
           >
             {statusMessage}
@@ -230,5 +284,54 @@ export function FileUploader({
 
 
     </div>
+
+    {/* Profile-completion popup for when backend rejects uploads
+        because the user profile is incomplete. */}
+    <Modal
+      open={showPopup}
+      title="Complete your profile"
+      onClose={() => setShowPopup(false)}
+      actions={
+        <>
+          <Button
+            variant="ghost"
+            className="text-white/90"
+            onClick={() => setShowPopup(false)}
+          >
+            Close
+          </Button>
+          <Button
+            className="bg-white text-blue-900 hover:opacity-95"
+            onClick={() => setShowPopup(false)}
+            asChild
+          >
+            <Link href="/profile">Edit profile</Link>
+          </Button>
+        </>
+      }
+    >
+      <p className="text-sm text-white/90 mb-2">
+        {popupMessage ||
+          'Please complete your profile.'}
+      </p>
+    </Modal>
+
+    {/* Popup for upload limit exceeded */}
+    <Modal
+      open={showLimitPopup}
+      title="Upload limit"
+      onClose={() => setShowLimitPopup(false)}
+      actions={[
+        <Button key="ok" onClick={() => setShowLimitPopup(false)}>
+          OK
+        </Button>,
+      ]}
+    >
+      <p className="text-sm text-gray-700 dark:text-gray-200">
+        {limitPopupMessage}
+      </p>
+    </Modal>
+    
+    </>
   )
 }

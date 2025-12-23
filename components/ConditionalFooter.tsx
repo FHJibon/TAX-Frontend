@@ -3,6 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 
 export default function ConditionalFooter() {
   const pathname = usePathname()
@@ -17,8 +18,8 @@ export default function ConditionalFooter() {
         <div className="flex flex-col items-center justify-center space-y-5">
           {/* Logo */}
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg blur-sm opacity-40"></div>
-            <img src="/logo.svg" alt="Tax Assistant Logo" className="h-8 w-8 relative z-10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg blur-sm opacity-40"></div>
+            <Image src="/logo.svg" alt="Tax Assistant Logo" width={32} height={32} className="h-8 w-8 relative z-10" />
           </div>
 
           {/* Links */}

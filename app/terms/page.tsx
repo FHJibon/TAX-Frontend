@@ -18,7 +18,7 @@ export default function TermsPage() {
           backgroundSize: '50px 50px'
         }}></div>
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-float-slow"></div>
       </div>
       <Navbar />
       
@@ -27,7 +27,7 @@ export default function TermsPage() {
         {/* Header */}
         <div className="text-center mb-6 md:mb-8 animate-fade-in-up">
           <div className="flex justify-center mb-4 animate-scale-in">
-            <div className="p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full border border-blue-500/20 shadow-lg">
+            <div className="p-4 bg-gradient-to-br from-blue-500/20 to-blue-500/20 rounded-full border border-blue-500/20 shadow-lg">
               <FileText className="h-10 w-10 md:h-12 md:w-12 text-blue-400" />
             </div>
           </div>

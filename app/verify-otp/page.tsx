@@ -47,6 +47,14 @@ function VerifyOTPInner() {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus()
     }
+    if (e.key === 'Enter') {
+      const otpCode = otp.join('')
+      if (otpCode.length === 6) {
+        e.preventDefault()
+        // Trigger verification when Enter is pressed and code complete
+        handleVerify()
+      }
+    }
   }
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -79,20 +87,30 @@ function VerifyOTPInner() {
 
     setIsVerifying(true)
     setError('')
-
-    // TODO: Replace with actual API call to verify OTP
-    // Example: const result = await verifyOTP(email, otpCode)
-    setTimeout(() => {
-      // Accept any 6-digit code for now (integrate with backend)
-      setSuccess(true)
-      setTimeout(() => {
-        if (type === 'forgot-password') {
-          router.push('/reset-password?verified=true')
+    try {
+      const { authAPI } = await import('@/lib/api')
+      if (type === 'forgot-password') {
+        // For password reset, proceed to reset page with email+code
+        setSuccess(true)
+        setTimeout(() => {
+          router.push(`/reset-password?email=${encodeURIComponent(email)}&code=${encodeURIComponent(otpCode)}`)
+        }, 800)
+      } else {
+        const res = await authAPI.verifySignup(email, otpCode)
+        if (res.status === 200) {
+          setSuccess(true)
+          setTimeout(() => {
+            router.push('/login?verified=true')
+          }, 1500)
         } else {
-          router.push('/login?verified=true')
+          setError(language === 'bn' ? 'ভুল কোড' : 'Invalid code')
         }
-      }, 1500)
-    }, 1500)
+      }
+    } catch (err: any) {
+      setError(language === 'bn' ? 'যাচাই ব্যর্থ' : 'Verification failed')
+    } finally {
+      setIsVerifying(false)
+    }
   }
 
   const handleResend = () => {
@@ -113,7 +131,7 @@ function VerifyOTPInner() {
           backgroundSize: '50px 50px'
         }}></div>
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse-float"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-float-slow"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] animate-float-slow"></div>
       </div>
       
       <Navbar />
@@ -135,7 +153,7 @@ function VerifyOTPInner() {
               </Button>
               
               <div className="flex justify-center pt-8">
-                <div className="p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl border border-blue-500/20">
+                <div className="p-4 bg-gradient-to-br from-blue-500/20 to-blue-500/20 rounded-2xl border border-blue-500/20">
                   <Shield className="h-12 w-12 text-blue-400" />
                 </div>
               </div>
@@ -194,7 +212,7 @@ function VerifyOTPInner() {
               <Button
                 onClick={handleVerify}
                 disabled={otp.join('').length !== 6 || isVerifying || success}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold h-12"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-700 text-white font-semibold h-12"
               >
                 {isVerifying 
                   ? (language === 'bn' ? 'যাচাই করা হচ্ছে...' : 'Verifying...') 
